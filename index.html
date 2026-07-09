@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Έλεγχος Συνδρομής Μέλους</title>
+<style>
+  :root{
+    --ink:#1c2b24;
+    --paper:#f6f4ee;
+    --card:#ffffff;
+    --line:#243b30;
+    --brass:#a9812f;
+    --brass-deep:#7d5f21;
+    --ok:#2f6b3f;
+    --warn:#9c3b2b;
+    --muted:#6b7a72;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    min-height:100vh;
+    background:
+      radial-gradient(circle at 20% -10%, rgba(169,129,47,0.10), transparent 45%),
+      var(--paper);
+    font-family:'Iowan Old Style','Georgia','Noto Serif',serif;
+    color:var(--ink);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+  }
+
+  .wrap{ width:100%; max-width:420px; }
+
+  .eyebrow{
+    text-align:center;
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:11px;
+    letter-spacing:.22em;
+    text-transform:uppercase;
+    color:var(--brass-deep);
+    margin-bottom:10px;
+  }
+
+  h1{
+    text-align:center;
+    font-size:26px;
+    font-weight:600;
+    line-height:1.25;
+    margin:0 0 28px;
+    color:var(--ink);
+  }
+
+  .card{
+    background:var(--card);
+    border:1px solid rgba(36,59,48,0.15);
+    border-radius:2px;
+    padding:34px 30px 30px;
+    position:relative;
+    box-shadow:0 1px 2px rgba(28,43,36,0.04), 0 12px 28px -14px rgba(28,43,36,0.18);
+  }
+  .card::before{
+    content:"";
+    position:absolute;
+    top:0;left:0;right:0;
+    height:3px;
+    background:linear-gradient(90deg, var(--brass), var(--brass-deep));
+  }
+
+  label{
+    display:block;
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:11px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin-bottom:10px;
+  }
+
+  .id-input{
+    width:100%;
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:22px;
+    letter-spacing:.06em;
+    padding:14px 14px;
+    border:1.5px solid rgba(36,59,48,0.28);
+    border-radius:2px;
+    background:var(--paper);
+    color:var(--ink);
+    outline:none;
+    transition:border-color .15s ease, background .15s ease;
+  }
+  .id-input:focus{
+    border-color:var(--brass-deep);
+    background:#fff;
+  }
+
+  button{
+    width:100%;
+    margin-top:16px;
+    padding:13px 14px;
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:13px;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    font-weight:600;
+    color:#fdfbf6;
+    background:var(--ink);
+    border:none;
+    border-radius:2px;
+    cursor:pointer;
+    transition:background .15s ease, transform .05s ease;
+  }
+  button:hover{ background:#0f1a15; }
+  button:active{ transform:translateY(1px); }
+  button:disabled{ opacity:.55; cursor:default; }
+
+  .result{
+    margin-top:26px;
+    padding-top:22px;
+    border-top:1px dashed rgba(36,59,48,0.25);
+    display:none;
+    font-family:'Helvetica Neue',Arial,sans-serif;
+  }
+  .result.show{ display:block; }
+
+  .result .id-echo{
+    font-size:11px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin-bottom:6px;
+  }
+
+  .status-line{
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+    font-family:'Iowan Old Style','Georgia',serif;
+  }
+  .status-dot{
+    width:9px;height:9px;
+    border-radius:50%;
+    flex:none;
+    margin-bottom:2px;
+  }
+  .status-dot.ok{ background:var(--ok); }
+  .status-dot.warn{ background:var(--warn); }
+
+  .status-text{ font-size:19px; line-height:1.4; }
+  .status-text b{ font-weight:700; }
+  .status-text.ok{ color:var(--ok); }
+  .status-text.warn{ color:var(--warn); }
+
+  .error-text{
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:14px;
+    color:var(--warn);
+  }
+
+  .footnote{
+    text-align:center;
+    margin-top:18px;
+    font-family:'Helvetica Neue',Arial,sans-serif;
+    font-size:11.5px;
+    color:var(--muted);
+  }
+
+  .spinner{
+    display:inline-block;
+    width:14px;height:14px;
+    border:2px solid rgba(253,251,246,0.35);
+    border-top-color:#fdfbf6;
+    border-radius:50%;
+    animation:spin .7s linear infinite;
+    vertical-align:-2px;
+    margin-right:8px;
+  }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+</style>
+</head>
+<body>
+
+  <div class="wrap">
+    <div class="eyebrow">Πολιτιστικός Σύλλογος Αρκαδικού · Μητρώο Μελών</div>
+    <h1>Έλεγχος Συνδρομής</h1>
+
+    <div class="card">
+      <label for="idInput">Κωδικός Μέλους</label>
+      <input
+        id="idInput"
+        class="id-input"
+        type="text"
+        inputmode="text"
+        autocomplete="off"
+        autocapitalize="characters"
+        placeholder="π.χ. 0042"
+      />
+      <button id="checkBtn" type="button">Έλεγχος</button>
+
+      <div id="result" class="result">
+        <div class="id-echo" id="idEcho"></div>
+        <div class="status-line">
+          <span id="statusDot" class="status-dot"></span>
+          <span id="statusText" class="status-text"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="footnote">Πληκτρολoγήστε τον προσωπικό σας κωδικό που αναγράφεται στην κάρτα μέλους για να δειτε την κατάσταση συνδρομής σας.</div>
+  </div>
+
+<script>
+  
+  const API_URL = "https://script.google.com/macros/s/AKfycbzshK50OPwLWCbWLZAvzBh6i3WJBCwOFYx6yiun7dNUkfnDVsYai5abmVuX7lNuQLen0w/exec";
+
+  const idInput = document.getElementById('idInput');
+  const checkBtn = document.getElementById('checkBtn');
+  const result = document.getElementById('result');
+  const idEcho = document.getElementById('idEcho');
+  const statusDot = document.getElementById('statusDot');
+  const statusText = document.getElementById('statusText');
+
+  function currentGreekYear(){
+    return new Date().getFullYear();
+  }
+
+  async function checkId(){
+    const id = idInput.value.trim();
+    if(!id) { idInput.focus(); return; }
+
+    checkBtn.disabled = true;
+    checkBtn.innerHTML = '<span class="spinner"></span>Αναζήτηση…';
+    result.classList.remove('show');
+
+    try{
+      const res = await fetch(`${API_URL}?id=${encodeURIComponent(id)}`);
+      const data = await res.json();
+
+      idEcho.textContent = `Κωδικός: ${id}`;
+
+      if(!data.found){
+        statusDot.className = 'status-dot warn';
+        statusText.className = 'status-text warn';
+        statusText.innerHTML = 'Ο κωδικός δεν βρέθηκε στο μητρώο.';
+      } else {
+        const year = data.lastPaidYear;
+        const isCurrent = Number(year) >= currentGreekYear();
+        statusDot.className = 'status-dot ' + (isCurrent ? 'ok' : 'warn');
+        statusText.className = 'status-text ' + (isCurrent ? 'ok' : 'warn');
+        statusText.innerHTML = isCurrent
+          ? `Ενήμερος έως και το <b>${year}</b>`
+          : `Οφειλή — τελευταία πληρωμή <b>${year}</b>`;
+      }
+
+      result.classList.add('show');
+    } catch(err){
+      idEcho.textContent = '';
+      statusDot.className = 'status-dot warn';
+      statusText.className = 'status-text warn';
+      statusText.textContent = 'Σφάλμα σύνδεσης. Δοκίμασε ξανά.';
+      result.classList.add('show');
+    } finally {
+      checkBtn.disabled = false;
+      checkBtn.textContent = 'Έλεγχος';
+    }
+  }
+
+  checkBtn.addEventListener('click', checkId);
+  idInput.addEventListener('keydown', (e) => { if(e.key === 'Enter') checkId(); });
+</script>
+
+</body>
+</html>
